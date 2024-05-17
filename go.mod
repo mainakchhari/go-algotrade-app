@@ -1,4 +1,4 @@
-module example-go-app
+module go-algotrade-app
 
 go 1.21.1
 

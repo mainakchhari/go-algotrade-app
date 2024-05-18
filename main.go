@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	binance_datasource "go-algotrade-app/datasource/impl/binance"
+	binance_datasource "go-algotrade-app/binance/datasource"
 
+	binance_strategy "go-algotrade-app/binance/strategy"
 	strategy_impl "go-algotrade-app/strategy/impl"
-	binance_strategy "go-algotrade-app/strategy/impl/binance"
 	wallets_impl "go-algotrade-app/wallets/impl"
 	"sync"
 )
@@ -38,7 +38,7 @@ func main() {
 
 	for {
 		message := <-stream.GetDataChan()
-		fmt.Printf("Price Event %10.3f -> Wallet Balance -> SMAC %10.3f :: RDS %10.3f\n", message.Price, wallet_smac.GetAmount(), wallet_rds.GetAmount())
+		fmt.Printf("Price Event %10.4f -> Wallet Balance -> SMAC %10.4f :: RDS %10.4f\n", message.Price, wallet_smac.GetAmount(), wallet_rds.GetAmount())
 	}
 
 }

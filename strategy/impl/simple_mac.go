@@ -12,7 +12,7 @@ type SimpleMacStrategy struct {
 	longAvg     float32
 }
 
-func (s *SimpleMacStrategy) Execute(event strategy.IEvent) (strategy.Decision, float32) {
+func (s *SimpleMacStrategy) Execute(event strategy.IPriceEvent) (strategy.Decision, float32) {
 	decision := strategy.HOLD
 
 	s.longRing.Value = event.GetPrice()

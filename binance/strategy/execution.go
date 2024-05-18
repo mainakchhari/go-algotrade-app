@@ -1,10 +1,10 @@
-package binance
+package strategy
 
 import (
+	binance_datasource "go-algotrade-app/binance/datasource"
 	"go-algotrade-app/datasource"
-	binance "go-algotrade-app/datasource/impl/binance"
 	"go-algotrade-app/strategy"
-	"go-algotrade-app/strategy/impl"
+	strategy_impl "go-algotrade-app/strategy/impl"
 	"go-algotrade-app/wallets"
 	wallets_impl "go-algotrade-app/wallets/impl"
 	"sync"
@@ -12,7 +12,7 @@ import (
 
 type BinanceSourceStratExecution struct {
 	strategy *strategy.IStrategy
-	stream   datasource.IStream[binance.BinanceBaseTrade]
+	stream   datasource.IStream[binance_datasource.BinanceBaseTrade]
 	wallet   *wallets.IWallet
 }
 
@@ -20,7 +20,7 @@ func (se *BinanceSourceStratExecution) Execute(wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
 		message := <-se.stream.GetDataChan()
-		event := impl.NewEvent(message.Get().(binance.BinanceBaseTrade).Price)
+		event := strategy_impl.NewEvent(message.Get().(binance_datasource.BinanceBaseTrade).Price)
 		decision, price := (*se.strategy).Execute(event)
 		amount := price * 0.001
 		txn := wallets_impl.NewTransaction(se.wallet, amount, wallets.TxnBound(-1*decision))
@@ -29,7 +29,7 @@ func (se *BinanceSourceStratExecution) Execute(wg *sync.WaitGroup) {
 
 }
 
-func NewStratExecution(strategy *strategy.IStrategy, stream datasource.IStream[binance.BinanceBaseTrade], wallet *wallets.IWallet) *BinanceSourceStratExecution {
+func NewStratExecution(strategy *strategy.IStrategy, stream datasource.IStream[binance_datasource.BinanceBaseTrade], wallet *wallets.IWallet) *BinanceSourceStratExecution {
 	newExecution := new(BinanceSourceStratExecution)
 	newExecution.strategy = strategy
 	newExecution.stream = stream

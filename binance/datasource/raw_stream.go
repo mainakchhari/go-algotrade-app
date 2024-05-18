@@ -1,4 +1,4 @@
-package binance
+package datasource
 
 import (
 	"encoding/json"

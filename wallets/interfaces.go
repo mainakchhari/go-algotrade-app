@@ -1,13 +1,14 @@
 package wallets
 
+import "go-algotrade-app/events"
+
 type IWallet interface {
+	events.IHasEventChan
 	GetAmount() float32
-	GetHolding() float32
-	GetTxns() []ITxn
-	AddTxn(*ITxn) []ITxn
+	AddTxn(*ITransaction)
 }
 
-type ITxn interface {
+type ITransaction interface {
 	GetWallet() *IWallet
 	GetAmount() float32
 	GetBound() int

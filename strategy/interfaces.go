@@ -1,8 +1,6 @@
 package strategy
 
-type IEvent interface {
-	GetPrice() float32
-}
+import "go-algotrade-app/events"
 
 // A IStrategy is a set of rules that determine when to buy, sell, or hold an asset.
 // It is a struct that contains the rules and the data that the rules operate on.
@@ -12,5 +10,10 @@ type IEvent interface {
 // The struct is created by a constructor function.
 // The struct is passed to a function that executes the rules.
 type IStrategy interface {
-	Execute(event IEvent) (Decision, float32)
+	Execute(event IPriceEvent) (Decision, float32)
+}
+
+type IPriceEvent interface {
+	events.IEvent
+	GetPrice() float32
 }

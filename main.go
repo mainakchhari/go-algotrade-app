@@ -46,13 +46,14 @@ func main() {
 	wg.Add(1)
 	go rds_execution.Execute(&wg)
 
+	stored_value_smac, stored_value_rds := float32(0), float32(0)
 	for {
 		//read stream source & publish data event to each source chan
 		message := <-stream.GetDataChan()
 		smaExecChan <- message
 		rdsExecChan <- message
 
-		//read and print wallet value
+		//read and print wallet value whenever either changes
 		smacWalletNetValue, err := wallet_smac.GetNetValue(message.Price)
 		if err != nil {
 			panic(err)
@@ -61,6 +62,9 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf("Price Event %10.4f -> Wallet Balance -> SMAC %10.4f :: RDS %10.4f\n", message.Price, smacWalletNetValue, rdsWalletNetValue)
+		if stored_value_rds != rdsWalletNetValue || stored_value_smac != smacWalletNetValue {
+			fmt.Printf("Price Event %10.4f -> Wallet Balance -> SMAC %10.4f :: RDS %10.4f\n", message.Price, smacWalletNetValue, rdsWalletNetValue)
+		}
+		stored_value_rds, stored_value_smac = rdsWalletNetValue, smacWalletNetValue
 	}
 }

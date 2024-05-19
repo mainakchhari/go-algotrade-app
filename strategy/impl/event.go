@@ -1,15 +1,15 @@
 package impl
 
-type Event struct {
+type PriceEvent struct {
 	price float32
 }
 
-func (e *Event) GetPrice() float32 {
+func (e PriceEvent) GetPrice() float32 {
 	return e.price
 }
 
-func NewEvent(p float32) *Event {
-	return &Event{
+func NewPriceEvent(p float32) PriceEvent {
+	return PriceEvent{
 		price: p,
 	}
 }

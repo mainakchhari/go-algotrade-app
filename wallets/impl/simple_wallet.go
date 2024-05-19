@@ -1,29 +1,30 @@
 package impl
 
-import (
-	"go-algotrade-app/events"
-	"go-algotrade-app/wallets"
-)
+import "errors"
 
 type SimpleWallet struct {
-	amt       float32
-	eventChan chan events.IEvent
+	balance float32
 }
 
-func (sw *SimpleWallet) GetEventChan() chan events.IEvent {
-	return sw.eventChan
+func (sw *SimpleWallet) GetBalance() float32 {
+	return sw.balance
 }
 
-func (sw *SimpleWallet) GetAmount() float32 {
-	return sw.amt
+func (sw *SimpleWallet) Deposit(amt float32) {
+	sw.balance = sw.balance + amt
 }
 
-func (sw *SimpleWallet) AddTxn(txn *wallets.ITransaction) {
-	sw.amt = sw.amt + (*txn).GetAmount()*float32((*txn).GetBound())
+func (sw *SimpleWallet) Withdraw(amt float32) error {
+	newBalance := sw.balance - amt
+	if newBalance < 0 {
+		return errors.New("balance cannot be less than 0")
+	}
+	sw.balance = newBalance
+	return nil
 }
 
-func NewSimpleWallet(startAmt float32, startHolding float32) wallets.IWallet {
-	wallet := new(SimpleWallet)
-	wallet.amt = startAmt
-	return wallet
+func NewSimpleWallet(balance float32) SimpleWallet {
+	return SimpleWallet{
+		balance,
+	}
 }

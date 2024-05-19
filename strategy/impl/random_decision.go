@@ -14,6 +14,6 @@ func (*RandomDecisionStrategy) Execute(event strategy.IPriceEvent) (strategy.Dec
 	return decision, event.GetPrice()
 }
 
-func NewRandomDecisionStrategy() strategy.IStrategy {
-	return new(RandomDecisionStrategy)
+func NewRandomDecisionStrategy() RandomDecisionStrategy {
+	return RandomDecisionStrategy{}
 }

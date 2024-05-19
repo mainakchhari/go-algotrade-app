@@ -43,9 +43,9 @@ func (s *SimpleMacStrategy) Execute(event strategy.IPriceEvent) (strategy.Decisi
 	return decision, event.GetPrice()
 }
 
-func NewSimpleMacStrategy(shortPeriods int, longPeriods int) strategy.IStrategy {
+func NewSimpleMacStrategy(shortPeriods int, longPeriods int) SimpleMacStrategy {
 	strat := new(SimpleMacStrategy)
 	strat.longRing = ring.New(longPeriods)
 	strat.shortLength = shortPeriods
-	return strat
+	return *strat
 }

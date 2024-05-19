@@ -12,6 +12,10 @@ type BinanceSourceStrategyExecutor struct {
 	wallet   wallets.IHoldAsset
 }
 
+func (se *BinanceSourceStrategyExecutor) GetDataSource() chan strategy.IPriceEvent {
+	return se.source
+}
+
 func (se *BinanceSourceStrategyExecutor) Execute(wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
@@ -35,9 +39,10 @@ func (se *BinanceSourceStrategyExecutor) Execute(wg *sync.WaitGroup) {
 
 }
 
-func NewBinanceSourceStrategyExecutor(strategy strategy.IStrategy, source chan strategy.IPriceEvent, wallet wallets.IHoldAsset) *BinanceSourceStrategyExecutor {
+func NewBinanceSourceStrategyExecutor(strat strategy.IStrategy, wallet wallets.IHoldAsset) *BinanceSourceStrategyExecutor {
+	source := make(chan strategy.IPriceEvent)
 	return &BinanceSourceStrategyExecutor{
-		strategy,
+		strat,
 		source,
 		wallet,
 	}

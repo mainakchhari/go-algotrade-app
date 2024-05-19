@@ -19,7 +19,7 @@ type BinanceRawStream struct {
 	trades chan BinanceBaseTrade
 }
 
-func (r *BinanceRawStream) GetDataChan() chan BinanceBaseTrade {
+func (r *BinanceRawStream) GetDataSink() chan BinanceBaseTrade {
 	return r.trades
 }
 

@@ -20,7 +20,7 @@ type BinanceCombinedStream struct {
 	trades chan BinanceCombinedStreamMessage
 }
 
-func (r *BinanceCombinedStream) GetDataChan() chan BinanceCombinedStreamMessage {
+func (r *BinanceCombinedStream) GetDataSink() chan BinanceCombinedStreamMessage {
 	return r.trades
 }
 
@@ -43,7 +43,7 @@ func (r *BinanceCombinedStream) Process(wg *sync.WaitGroup) {
 	}
 }
 
-func NewCombinedStream(name string) datasource.IStream[BinanceCombinedStreamMessage] {
+func NewBinanceCombinedStream(name string) datasource.IStream[BinanceCombinedStreamMessage] {
 	stream := new(BinanceCombinedStream)
 	stream.URI = fmt.Sprintf("wss://fstream.binance.com/stream?streams=%s", name)
 	stream.trades = make(chan BinanceCombinedStreamMessage)

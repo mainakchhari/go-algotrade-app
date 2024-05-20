@@ -19,12 +19,20 @@ type BinanceBaseTrade struct {
 	IsMarketMaker        bool    `json:"m"`        // aggTrade only
 }
 
+func (t BinanceBaseTrade) GetEventType() string {
+	return t.EventType
+}
+
 func (t BinanceBaseTrade) Get() interface{} {
 	return t
 }
 
 func (t BinanceBaseTrade) GetPrice() float32 {
 	return t.Price
+}
+
+func (t BinanceBaseTrade) GetQuantity() float32 {
+	return t.Quantity
 }
 
 func (t *BinanceBaseTrade) DisplayTime() *time.Time {

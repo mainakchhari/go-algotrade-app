@@ -34,13 +34,13 @@ func renderTable(t *table.Writer, tr []table.Row) {
 
 func main() {
 
-	stream := binance_datasource.NewBinanceRawStream("btcusdt@trade")
+	stream := binance_datasource.NewBinanceRawStream("btcusdt@aggTrade")
 	var wg sync.WaitGroup
 	defer wg.Wait()
 	wg.Add(1)
 
 	go stream.Process(&wg)
-	smac := strategy_impl.NewSimpleMacStrategy(100, 10000)
+	smac := strategy_impl.NewSimpleMacStrategy(18, 200)
 	rds := strategy_impl.NewRandomDecisionStrategy()
 
 	// Start with a wallet for each with 1_000_000 balance

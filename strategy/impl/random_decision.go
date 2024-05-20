@@ -8,7 +8,7 @@ import (
 
 type RandomDecisionStrategy struct{}
 
-func (*RandomDecisionStrategy) Execute(event strategy.IPriceEvent) (strategy.Decision, float32) {
+func (*RandomDecisionStrategy) Execute(event strategy.IStrategyEvent) (strategy.Decision, float32) {
 	rand.New(rand.NewSource(time.Now().UnixNano()))
 	decision := strategy.Decision(rand.Intn(3) - 1)
 	return decision, event.GetPrice()

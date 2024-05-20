@@ -1,4 +1,4 @@
-package impl
+package strategy
 
 import (
 	"go-algotrade-app/strategy"
@@ -8,11 +8,11 @@ import (
 
 type BinanceSourceStrategyExecutor struct {
 	strategy strategy.IStrategy
-	source   chan strategy.IPriceEvent
+	source   chan strategy.IStrategyEvent
 	wallet   wallets.IHoldAsset
 }
 
-func (se *BinanceSourceStrategyExecutor) GetDataSource() chan strategy.IPriceEvent {
+func (se *BinanceSourceStrategyExecutor) GetDataSource() chan strategy.IStrategyEvent {
 	return se.source
 }
 
@@ -40,7 +40,7 @@ func (se *BinanceSourceStrategyExecutor) Execute(wg *sync.WaitGroup) {
 }
 
 func NewBinanceSourceStrategyExecutor(strat strategy.IStrategy, wallet wallets.IHoldAsset) *BinanceSourceStrategyExecutor {
-	source := make(chan strategy.IPriceEvent)
+	source := make(chan strategy.IStrategyEvent)
 	return &BinanceSourceStrategyExecutor{
 		strat,
 		source,

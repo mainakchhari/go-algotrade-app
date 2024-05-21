@@ -20,3 +20,6 @@ An executor connects a strategy to a wallet and executes an actual transaction o
 For simplification, a fixed amount executor is implemented that decides to buy a fixed amount 
 of an asset corresponding to a BUY/SELL signal. As output, we display the wallet balances (both asset holding and money) which
 are refreshed with each event
+
+## To Run
+Just running `go run .` should do it! :)

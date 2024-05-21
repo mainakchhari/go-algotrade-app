@@ -7,16 +7,15 @@ import (
 	"net/http"
 	"sync"
 
-	"go-algotrade-app/datasource"
-
 	"github.com/gorilla/websocket"
 )
+
+const BINANCE_WEBSOCKET_COMBINED_BASE = "wss://fstream.binance.com/stream?streams=%s"
 
 type BinanceCombinedStream struct {
 	URI    string
 	conn   *websocket.Conn
 	resp   *http.Response
-	Error  error
 	trades chan BinanceCombinedStreamMessage
 }
 
@@ -29,13 +28,14 @@ func (r *BinanceCombinedStream) Process(wg *sync.WaitGroup) {
 	for {
 		_, connMessage, readErr := r.conn.ReadMessage()
 		if readErr != nil {
-			r.Error = readErr
-			log.Fatal(r.Error)
+			close(r.trades)
+			log.Fatal(readErr)
 		}
 
 		var message BinanceCombinedStreamMessage
 		err := json.Unmarshal(connMessage, &message)
 		if err != nil {
+			close(r.trades)
 			log.Fatal(err)
 		}
 
@@ -43,13 +43,16 @@ func (r *BinanceCombinedStream) Process(wg *sync.WaitGroup) {
 	}
 }
 
-func NewBinanceCombinedStream(name string) datasource.IStream[BinanceCombinedStreamMessage] {
-	stream := new(BinanceCombinedStream)
-	stream.URI = fmt.Sprintf("wss://fstream.binance.com/stream?streams=%s", name)
-	stream.trades = make(chan BinanceCombinedStreamMessage)
-	stream.conn, stream.resp, stream.Error = websocket.DefaultDialer.Dial(stream.URI, nil)
-	if stream.Error != nil {
-		log.Fatal(stream.Error)
+func NewBinanceCombinedStream(name string) *BinanceCombinedStream {
+	streamURI := fmt.Sprintf(BINANCE_WEBSOCKET_COMBINED_BASE, name)
+	conn, resp, err := websocket.DefaultDialer.Dial(streamURI, nil)
+	if err != nil {
+		log.Fatal(err)
 	}
-	return stream
+	return &BinanceCombinedStream{
+		streamURI,
+		conn,
+		resp,
+		make(chan BinanceCombinedStreamMessage),
+	}
 }

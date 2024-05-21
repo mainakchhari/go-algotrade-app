@@ -20,12 +20,14 @@ func formatFloat(f float32) string {
 func initTableWriter() *table.Writer {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
-	t.AppendHeader(table.Row{"Strategy", "Balance", "Holding", "Net Val"})
 	return &t
 }
 
-func renderTable(t *table.Writer, tr []table.Row) {
+func renderTable(t *table.Writer, price string, tr []table.Row) {
 	(*t).ResetRows()
+	(*t).ResetHeaders()
+	(*t).AppendHeader(table.Row{"Price", price})
+	(*t).AppendHeader(table.Row{"Strategy", "Balance", "Holding", "Net Val"})
 	(*t).AppendRows(tr)
 	// hack to clear/refresh screen
 	fmt.Print("\033[H\033[2J")
@@ -55,21 +57,21 @@ func main() {
 		float32(0),
 	)
 
-	// create a Executor instance for each strat
-	smac_execution := binance_strategy.NewBinanceSourceStrategyExecutor(&smac, wallet_smac)
+	// create a fixed amount (0.01 Asset) Executor instance for each strat
+	smac_execution := binance_strategy.NewFixedAmountStrategyExecutor(0.01, &smac, wallet_smac)
 	wg.Add(1)
 	go smac_execution.Execute(&wg)
 
-	rds_execution := binance_strategy.NewBinanceSourceStrategyExecutor(&rds, wallet_rds)
+	rds_execution := binance_strategy.NewFixedAmountStrategyExecutor(0.01, &rds, wallet_rds)
 	wg.Add(1)
 	go rds_execution.Execute(&wg)
 
 	// init table for display
 	tw := initTableWriter()
 
-	for {
+	for message := range stream.GetDataSink() {
 		//read stream source & publish data event to each source chan
-		message := <-stream.GetDataSink()
+
 		smac_execution.GetDataSource() <- message
 		rds_execution.GetDataSource() <- message
 
@@ -80,9 +82,11 @@ func main() {
 		rdsWalletNetValue, _ := wallet_rds.GetNetValue(message.Price)
 		rdsWalletBalance := wallet_rds.GetBalance()
 		rdsWalletHolding := wallet_rds.GetHolding()
-		renderTable(tw, []table.Row{
+		renderTable(tw, formatFloat(message.Price), []table.Row{
 			{"RDS", formatFloat(rdsWalletBalance), formatFloat(rdsWalletHolding), formatFloat(rdsWalletNetValue)},
 			{"SMAC", formatFloat(smacWalletBalance), formatFloat(smacWalletHolding), formatFloat(smacWalletNetValue)},
 		})
 	}
+	close(smac_execution.GetDataSource())
+	close(rds_execution.GetDataSource())
 }

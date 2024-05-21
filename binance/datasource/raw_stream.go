@@ -10,12 +10,13 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+const BINANCE_WEBSOCKET_RAW_BASE = "wss://fstream.binance.com/ws/%s"
+
 // BinanceRawStream represents a raw stream for Binance trades.
 type BinanceRawStream struct {
 	URI    string
 	conn   *websocket.Conn
 	resp   *http.Response
-	Error  error
 	trades chan BinanceBaseTrade
 }
 
@@ -49,16 +50,16 @@ func (r *BinanceRawStream) Process(wg *sync.WaitGroup) {
 	for {
 		_, connMessage, readErr := r.conn.ReadMessage()
 		if readErr != nil {
-			r.Error = readErr
-			log.Fatal(r.Error)
+			close(r.trades)
+			log.Fatal(readErr)
 		}
 
 		messages, err := r.unmarshalArray(connMessage)
 		if err != nil {
 			message, err := r.unmarshalObject(connMessage)
 			if err != nil {
-				r.Error = err
-				log.Fatal(r.Error)
+				close(r.trades)
+				log.Fatal(err)
 			}
 			r.trades <- *message
 			continue
@@ -72,12 +73,15 @@ func (r *BinanceRawStream) Process(wg *sync.WaitGroup) {
 // NewBinanceRawStream creates a new instance of BinanceRawStream with the specified name.
 // It establishes a WebSocket connection to the Binance raw stream API and returns the stream object.
 func NewBinanceRawStream(name string) *BinanceRawStream {
-	stream := new(BinanceRawStream)
-	stream.URI = fmt.Sprintf("wss://fstream.binance.com/ws/%s", name)
-	stream.trades = make(chan BinanceBaseTrade)
-	stream.conn, stream.resp, stream.Error = websocket.DefaultDialer.Dial(stream.URI, nil)
-	if stream.Error != nil {
-		log.Fatal(stream.Error)
+	streamURI := fmt.Sprintf(BINANCE_WEBSOCKET_RAW_BASE, name)
+	conn, resp, err := websocket.DefaultDialer.Dial(streamURI, nil)
+	if err != nil {
+		log.Fatal(err)
 	}
-	return stream
+	return &BinanceRawStream{
+		streamURI,
+		conn,
+		resp,
+		make(chan BinanceBaseTrade),
+	}
 }
